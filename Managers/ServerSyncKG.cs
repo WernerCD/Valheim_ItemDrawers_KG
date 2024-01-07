@@ -16,7 +16,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using CompressionLevel = System.IO.Compression.CompressionLevel;
 
-namespace ServerSync;
+namespace ServerSyncKG;
 
 [PublicAPI]
 public abstract class OwnConfigEntryBase

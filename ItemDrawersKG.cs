@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Timers;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using JetBrains.Annotations;
 using PieceManager;
-using ServerSync;
+using ServerSyncKG;
 using UnityEngine;
 using UnityEngine.Audio;
 
 namespace kg_ItemDrawers
 {
-    [BepInPlugin(GUID, GUID, VERSION)] 
-    public class ItemDrawers : BaseUnityPlugin
+    [BepInPlugin(GUID, GUID, VERSION)]
+    public class ItemDrawersKG : BaseUnityPlugin
     { 
         private const string GUID = "kg.ItemDrawers";
         private const string VERSION = "1.0.7";
         private static ConfigSync configSync = new(GUID) { DisplayName = GUID, CurrentVersion = VERSION, MinimumRequiredVersion = VERSION, ModRequired = true, IsLocked = true};
-        public static ItemDrawers _thistype;
+        public static ItemDrawersKG _thistype;
         private static AssetBundle asset;
 
         public static ConfigEntry<int> DrawerPickupRange;
@@ -42,6 +43,7 @@ namespace kg_ItemDrawers
 
         private void Awake()
         {
+            LoadStupidTimer();
             _thistype = this;
             IncludeList = config("General", "IncludeList", "DragonEgg", "List of items with max stack size 1 to include in the drawer. Leave blank to include all items.");
             IncludeList.SettingChanged += ResetList;
@@ -103,8 +105,24 @@ namespace kg_ItemDrawers
             _drawer_nomodel.RequiredItems.Add("GreydwarfEye", 10, true);
             
             new Harmony(GUID).PatchAll();  
-        }  
-    
+        }
+        
+        #region StupidTimer
+
+        public System.Timers.Timer _timer;
+
+        private void LoadStupidTimer()
+        {
+            _timer = new System.Timers.Timer();
+            _timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            _timer.Interval = 5000;
+            _timer.Start();
+        }
+        private void OnTimedEvent(object sender, ElapsedEventArgs e) 
+            => Logger.LogInfo($"{nameof(ItemDrawersKG)} has ticked ${DateTime.Now:O}");
+
+        #endregion
+
         [HarmonyPatch(typeof(ZNetScene),nameof(ZNetScene.Awake))]
         private static class ZNetScene_Awake_Patch
         {

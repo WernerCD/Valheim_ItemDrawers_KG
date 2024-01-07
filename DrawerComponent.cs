@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 
 namespace kg_ItemDrawers;
 
-public class DrawerComponent : MonoBehaviour, Interactable, Hoverable
+public class DrawerComponent : Container, Interactable, Hoverable
 {
     public static readonly List<DrawerComponent> AllDrawers = [];
     private static Sprite _defaultSprite;
@@ -38,13 +38,13 @@ public class DrawerComponent : MonoBehaviour, Interactable, Hoverable
 
     public int PickupRange
     {
-        get => _znv.m_zdo.GetInt("PickupRange", ItemDrawers.DrawerPickupRange.Value);
+        get => _znv.m_zdo.GetInt("PickupRange", ItemDrawersKG.DrawerPickupRange.Value);
         set => _znv.m_zdo.Set("PickupRange", value);
     }
 
     private Color CurrentColor 
     {
-        get => global::Utils.Vec3ToColor(_znv.m_zdo.GetVec3("Color", ItemDrawers.DefaultColor.Value));
+        get => global::Utils.Vec3ToColor(_znv.m_zdo.GetVec3("Color", ItemDrawersKG.DefaultColor.Value));
         set => _znv.m_zdo.Set("Color", global::Utils.ColorToVec3(value));
     }
 
@@ -97,7 +97,7 @@ public class DrawerComponent : MonoBehaviour, Interactable, Hoverable
         if (_znv.IsOwner())
         {
             CurrentColor = options.color;
-            PickupRange = Mathf.Min(ItemDrawers.MaxDrawerPickupRange.Value, options.pickupRange);
+            PickupRange = Mathf.Min(ItemDrawersKG.MaxDrawerPickupRange.Value, options.pickupRange);
         }
         _text.color = options.color;
     }
@@ -175,7 +175,7 @@ public class DrawerComponent : MonoBehaviour, Interactable, Hoverable
                 continue;
             }
 
-            Instantiate(ItemDrawers.Explosion, component.transform.position, Quaternion.identity);
+            Instantiate(ItemDrawersKG.Explosion, component.transform.position, Quaternion.identity);
             int amount = component.m_itemData.m_stack;
             component.m_nview.ClaimOwnership();
             ZNetScene.instance.Destroy(component.gameObject);
@@ -222,7 +222,7 @@ public class DrawerComponent : MonoBehaviour, Interactable, Hoverable
         string dropPrefab = item.m_dropPrefab?.name;
         if (string.IsNullOrEmpty(dropPrefab)) return false;
 
-        if ((item.IsEquipable() || item.m_shared.m_maxStackSize <= 1) && !ItemDrawers.IncludeSet.Contains(dropPrefab)) return false;
+        if ((item.IsEquipable() || item.m_shared.m_maxStackSize <= 1) && !ItemDrawersKG.IncludeSet.Contains(dropPrefab)) return false;
 
         if (!string.IsNullOrEmpty(CurrentPrefab) && CurrentPrefab != dropPrefab) return false;
 
@@ -309,7 +309,7 @@ public class DrawerComponent : MonoBehaviour, Interactable, Hoverable
         int pickupRange = CurrentOptions.pickupRange;
         GUILayout.Space(16f);
         GUILayout.Label($"Pickup Range: <color={(pickupRange > 0 ? "lime" : "red")}><b>{pickupRange}</b></color>"); 
-        pickupRange = (int)GUILayout.HorizontalSlider(pickupRange, 0, ItemDrawers.MaxDrawerPickupRange.Value);
+        pickupRange = (int)GUILayout.HorizontalSlider(pickupRange, 0, ItemDrawersKG.MaxDrawerPickupRange.Value);
         CurrentOptions.pickupRange = pickupRange;
         GUILayout.Space(16f);
         if (GUILayout.Button("<color=lime>Apply</color>"))
